@@ -1,0 +1,137 @@
+/* XS /
+@media (min-width: 29.6875rem) { / 475px / 16px = 29.6875rem /
+  .container {
+    max-width: 29.6875rem;
+  }
+}
+
+/ SM /
+@media (min-width: 40rem) { / 640px / 16px = 40rem /
+  .container {
+    max-width: 40rem;
+  }
+}
+
+/ MD /
+@media (min-width: 48rem) { / 768px / 16px = 48rem /
+  .container {
+    max-width: 48rem;
+  }
+}
+
+/ LG /
+@media (min-width: 64rem) { / 1024px / 16px = 64rem /
+  .container {
+    max-width: 64rem;
+  }
+}
+
+/ XL /
+@media (min-width: 80rem) { / 1280px / 16px = 80rem /
+  .container {
+    max-width: 80rem;
+  }
+}
+
+/ XXL /
+@media (min-width: 96rem) { / 1536px / 16px = 96rem /
+  .container {
+    max-width: 96rem;
+  }
+} */
+
+:root {
+  /* sizes */
+  --size-xxs: 0.5rem;
+  --size-xs: 0.75rem;
+  --size-sm: 0.875rem;
+  --size-base: 1rem;
+  --size-lg: 1.125rem;
+  --size-xl: 1.25rem;
+  --size-2xl: 1.5rem;
+  --size-3xl: 1.875rem;
+  --size-4xl: 2.25rem;
+  --size-5xl: 3rem;
+  --size-6xl: 3.75rem;
+  --size-7xl: 4.5rem;
+  --size-8xl: 6rem;
+  --size-9xl: 8rem;
+  --size-10xl: 10rem;
+
+  /* Font sizes */
+  --fs-xxs: 0.5rem;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.25rem;
+  --fs-2xl: 1.5rem;
+  --fs-3xl: 1.875rem;
+  --fs-4xl: 2.25rem;
+  --fs-5xl: 3rem;
+  --fs-6xl: 3.75rem;
+  --fs-7xl: 4.5rem;
+  --fs-8xl: 6rem;
+  --fs-9xl: 8rem;
+  --fs-10xl: 10rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  line-height: calc(1em + 0.75rem);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.container {
+  width: 90%;
+  margin-inline: auto;
+}
+
+/* XS */
+@media (min-width: 29.6875rem) {
+  .container {
+    max-width: 29.6875rem;
+  }
+}
+
+/* SM */
+@media (min-width: 40rem) {
+  .container {
+    max-width: 40rem;
+  }
+}
+
+/* MD */
+@media (min-width: 48rem) {
+  .container {
+    max-width: 48rem;
+  }
+}
+
+/* LG */
+@media (min-width: 64rem) {
+  .container {
+    max-width: 64rem;
+  }
+}
+
+/* XL */
+@media (min-width: 80rem) {
+  .container {
+    max-width: 80rem;
+  }
+}
+
+/* XXL */
+@media (min-width: 96rem) {
+  .container {
+    max-width: 96rem;
+  }
+}
