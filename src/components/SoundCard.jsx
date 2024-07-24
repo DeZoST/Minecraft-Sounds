@@ -1,38 +1,75 @@
-import { useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Heading,
   Tag,
   TagLabel,
   Button,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
+  Progress,
+  IconButton,
+  Tooltip,
 } from "@chakra-ui/react";
+import { DownloadIcon, CopyIcon } from "@chakra-ui/icons";
 import PropTypes from "prop-types";
 
-function SoundCard({ sound }) {
-  const audioRef = useRef(null);
+function SoundCard({ sound, audioRef, globalVolume, isPlaying, onPlay }) {
+  const [progress, setProgress] = useState(0);
+  const audioElement = useRef(null);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (audioElement.current) {
+      audioElement.current.volume = globalVolume / 100;
+    }
+  }, [globalVolume]);
 
   const playSound = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
+    if (audioElement.current) {
+      onPlay();
+      audioElement.current.currentTime = 0;
+      audioElement.current.play();
+      intervalRef.current = setInterval(() => {
+        if (audioElement.current) {
+          const duration = audioElement.current.duration;
+          const currentTime = audioElement.current.currentTime;
+          setProgress((currentTime / duration) * 100);
+        }
+      }, 100);
     }
   };
 
   const pauseSound = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
+    if (audioElement.current) {
+      audioElement.current.pause();
+      clearInterval(intervalRef.current);
     }
   };
 
-  const handleVolumeChange = (value) => {
-    if (audioRef.current) {
-      audioRef.current.volume = value / 100;
-    }
+  const handleEnded = () => {
+    setProgress(0);
+    clearInterval(intervalRef.current);
+    if (audioRef) audioRef(null);
   };
+
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = audioElement.current.src;
+    link.download = `${sound.name}.ogg`;
+    link.click();
+  };
+
+  const handleCopyPath = () => {
+    navigator.clipboard.writeText(sound.file);
+    alert("Path copied to clipboard: " + sound.file);
+  };
+
+  useEffect(() => {
+    if (isPlaying) {
+      playSound();
+    } else {
+      pauseSound();
+    }
+  }, [isPlaying]);
 
   return (
     <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p="6">
@@ -46,30 +83,30 @@ function SoundCard({ sound }) {
           </Tag>
         ))}
       </Box>
-      <audio ref={audioRef} src={`sounds/${sound.file}.ogg`} />
+      <audio
+        ref={(el) => {
+          audioElement.current = el;
+          if (audioRef) audioRef(el);
+        }}
+        src={`sounds/${sound.file}.ogg`}
+        onEnded={handleEnded}
+      />
       <Box display="flex" justifyContent="center" gap={2} mt="4">
-        <Button onClick={playSound} colorScheme="teal">
-          Play
+        <Button
+          onClick={isPlaying ? pauseSound : () => onPlay()}
+          colorScheme="teal"
+        >
+          {isPlaying ? "Pause" : "Play"}
         </Button>
-        <Button onClick={pauseSound} colorScheme="teal" variant="outline">
-          Pause
-        </Button>
+        <Tooltip label="Download">
+          <IconButton icon={<DownloadIcon />} onClick={handleDownload} />
+        </Tooltip>
+        <Tooltip label="Copy Path">
+          <IconButton icon={<CopyIcon />} onClick={handleCopyPath} />
+        </Tooltip>
       </Box>
       <Box mt="4">
-        <Heading as="h4" size="sm">
-          Volume
-        </Heading>
-        <Slider
-          defaultValue={50}
-          min={0}
-          max={100}
-          onChange={handleVolumeChange}
-        >
-          <SliderTrack>
-            <SliderFilledTrack />
-          </SliderTrack>
-          <SliderThumb />
-        </Slider>
+        <Progress value={progress} size="sm" />
       </Box>
     </Box>
   );
@@ -77,6 +114,11 @@ function SoundCard({ sound }) {
 
 SoundCard.propTypes = {
   sound: PropTypes.object.isRequired,
+  stopAllSounds: PropTypes.func.isRequired,
+  audioRef: PropTypes.func.isRequired,
+  globalVolume: PropTypes.number.isRequired,
+  isPlaying: PropTypes.bool.isRequired,
+  onPlay: PropTypes.func.isRequired,
 };
 
 export default SoundCard;
