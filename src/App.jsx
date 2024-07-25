@@ -7,6 +7,7 @@ import {
     SliderTrack,
     SliderFilledTrack,
     SliderThumb,
+    VStack,
 } from "@chakra-ui/react";
 import { debounce } from "lodash";
 import { useInView } from "react-intersection-observer";
@@ -92,26 +93,28 @@ function App() {
     return (
         <Container maxW="container.xl">
             <Box textAlign="center" my={5}>
-                <Heading as="h1" size="xl">
-                    Minecraft Sound Library
-                </Heading>
-                <SearchBar setSearchTerm={setSearchTerm} />
-                <Box mt={4} mb={8}>
+                <VStack position="sticky" top={0} zIndex={999} bgColor="white">
+                    <Heading as="h1" size="xl">
+                        Minecraft Sound Library
+                    </Heading>
+                    <SearchBar setSearchTerm={setSearchTerm} />
                     <Heading as="h4" size="sm">
                         Volume Global
                     </Heading>
                     <Slider
+                        w="80%"
                         value={globalVolume}
                         min={0}
                         max={100}
                         onChange={handleGlobalVolumeChange}
+                        mb={10}
                     >
                         <SliderTrack>
                             <SliderFilledTrack />
                         </SliderTrack>
                         <SliderThumb />
                     </Slider>
-                </Box>
+                </VStack>
                 <SoundList
                     sounds={displayedSounds}
                     stopAllSounds={stopAllSounds}

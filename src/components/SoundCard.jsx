@@ -8,6 +8,7 @@ import {
     Progress,
     IconButton,
     Tooltip,
+    useToast,
 } from "@chakra-ui/react";
 import { DownloadIcon, CopyIcon } from "@chakra-ui/icons";
 import PropTypes from "prop-types";
@@ -16,6 +17,7 @@ function SoundCard({ sound, audioRef, globalVolume, isPlaying, onPlay }) {
     const [progress, setProgress] = useState(0);
     const audioElement = useRef(null);
     const intervalRef = useRef(null);
+    const toast = useToast();
 
     useEffect(() => {
         if (audioElement.current) {
@@ -60,7 +62,14 @@ function SoundCard({ sound, audioRef, globalVolume, isPlaying, onPlay }) {
 
     const handleCopyPath = () => {
         navigator.clipboard.writeText(sound.file);
-        alert("Path copied to clipboard: " + sound.file);
+        toast({
+            title: "Path copied to clipboard",
+            description: sound.file,
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+            position: "top-right",
+        });
     };
 
     useEffect(() => {
