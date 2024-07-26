@@ -16,6 +16,7 @@ import PropTypes from "prop-types";
 function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
     const [progress, setProgress] = useState(0);
     const [audioElement, setAudioElement] = useState(null);
+    const [isPaused, setIsPaused] = useState(false);
     const intervalRef = useRef(null);
     const toast = useToast();
 
@@ -23,7 +24,25 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
         if (audioElement) {
             audioElement.volume = globalVolume / 100;
         }
-    }, [globalVolume]);
+    }, [globalVolume, audioElement]);
+
+    useEffect(() => {
+        if (isPlaying) {
+            playSound();
+        } else {
+            pauseSound();
+        }
+    }, [isPlaying]);
+
+    useEffect(() => {
+        return () => {
+            if (audioElement) {
+                audioElement.pause();
+                audioElement.removeEventListener("ended", handleEnded);
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, [audioElement]);
 
     const playSound = () => {
         if (!audioElement) {
@@ -34,21 +53,33 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
             setAudioElement(newAudioElement);
 
             newAudioElement.play();
-            onPlay();
+            onPlay(sound.id); // Use unique sound ID
+
             intervalRef.current = setInterval(() => {
-                const duration = newAudioElement.duration;
-                const currentTime = newAudioElement.currentTime;
-                setProgress((currentTime / duration) * 100);
+                setProgress(
+                    (newAudioElement.currentTime / newAudioElement.duration) *
+                        100
+                );
             }, 10);
 
             newAudioElement.addEventListener("ended", handleEnded);
+        } else if (isPaused) {
+            audioElement.play();
+            setIsPaused(false);
+
+            intervalRef.current = setInterval(() => {
+                setProgress(
+                    (audioElement.currentTime / audioElement.duration) * 100
+                );
+            }, 10);
         } else {
             audioElement.currentTime = 0;
             audioElement.play();
+
             intervalRef.current = setInterval(() => {
-                const duration = audioElement.duration;
-                const currentTime = audioElement.currentTime;
-                setProgress((currentTime / duration) * 100);
+                setProgress(
+                    (audioElement.currentTime / audioElement.duration) * 100
+                );
             }, 10);
         }
     };
@@ -56,8 +87,8 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
     const pauseSound = () => {
         if (audioElement) {
             audioElement.pause();
+            setIsPaused(true);
             clearInterval(intervalRef.current);
-            setProgress(0);
         }
     };
 
@@ -65,6 +96,7 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
         setProgress(0);
         clearInterval(intervalRef.current);
         setAudioElement(null);
+        setIsPaused(false);
     };
 
     const handleDownload = () => {
@@ -88,14 +120,6 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
         });
     };
 
-    useEffect(() => {
-        if (isPlaying) {
-            playSound();
-        } else {
-            pauseSound();
-        }
-    }, [isPlaying]);
-
     return (
         <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p="6">
             <Heading as="h3" size="md">
@@ -110,10 +134,10 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
             </Box>
             <Box display="flex" justifyContent="center" gap={2} mt="4">
                 <Button
-                    onClick={isPlaying ? pauseSound : () => onPlay()}
+                    onClick={isPlaying ? pauseSound : onPlay}
                     colorScheme="teal"
                 >
-                    {isPlaying ? "Pause" : "Play"}
+                    {isPlaying && !isPaused ? "Pause" : "Play"}
                 </Button>
                 <Tooltip label="Download">
                     <IconButton
@@ -134,8 +158,6 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
 
 SoundCard.propTypes = {
     sound: PropTypes.object.isRequired,
-    stopAllSounds: PropTypes.func.isRequired,
-    audioRef: PropTypes.func.isRequired,
     globalVolume: PropTypes.number.isRequired,
     isPlaying: PropTypes.bool.isRequired,
     onPlay: PropTypes.func.isRequired,

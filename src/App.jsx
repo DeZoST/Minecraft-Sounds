@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     Box,
     Container,
@@ -8,72 +8,59 @@ import {
     SliderFilledTrack,
     SliderThumb,
     VStack,
+    Button,
+    HStack,
+    Text,
 } from "@chakra-ui/react";
 import { debounce } from "lodash";
-import { useInView } from "react-intersection-observer";
 import SoundList from "./components/SoundList";
 import SearchBar from "./components/SearchBar";
+
+const fetchSounds = async (page, searchTerm, itemsPerPage) => {
+    try {
+        const response = await fetch(
+            `http://localhost:3000/sounds?page=${page}&limit=${itemsPerPage}&search=${searchTerm}`
+        );
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching sounds: ", error);
+        return { sounds: [], meta: { total: 0, pageCount: 0, currentPage: 1 } };
+    }
+};
 
 function App() {
     const [searchTerm, setSearchTerm] = useState("");
     const [displayedSounds, setDisplayedSounds] = useState([]);
-    const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
+    const [pageCount, setPageCount] = useState(0);
     const itemsPerPage = 12;
     const [globalVolume, setGlobalVolume] = useState(50);
     const [playingSound, setPlayingSound] = useState(null);
-    const audioRefs = useRef([]);
-    const { ref, inView } = useInView();
-
-    const fetchSounds = async (page, searchTerm) => {
-        try {
-            const response = await fetch(
-                `http://localhost:3000/sounds?page=${page}&search=${searchTerm}`
-            );
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error("Error fetching sounds : ", error);
-            return [];
-        }
-    };
 
     const debouncedSearch = useCallback(
         debounce(async (term) => {
-            const sounds = await fetchSounds(1, term);
-            setDisplayedSounds(sounds);
-            setHasMore(sounds.length === itemsPerPage);
+            const data = await fetchSounds(1, term, itemsPerPage);
+            setDisplayedSounds(data.sounds);
             setPage(1);
+            setPageCount(data.meta.pageCount);
         }, 300),
-        [fetchSounds, setDisplayedSounds, setHasMore, setPage]
+        []
     );
 
     useEffect(() => {
         debouncedSearch(searchTerm);
     }, [searchTerm, debouncedSearch]);
 
-    /*    const fetchMoreData = async () => {
-        const nextPage = page + 1;
-        const sounds = await fetchSounds(nextPage, searchTerm);
-
-        setDisplayedSounds((prev) => [...prev, ...sounds]);
-        setHasMore(sounds.length === itemsPerPage);
-        setPage(nextPage);
+    const handlePageChange = async (newPage) => {
+        const data = await fetchSounds(newPage, searchTerm, itemsPerPage);
+        setDisplayedSounds(data.sounds);
+        setPage(newPage);
+        setPageCount(data.meta.pageCount);
     };
 
-    useEffect(() => {
-        if (inView && hasMore) {
-            fetchMoreData();
-        }
-    }, [inView, hasMore]); */
-
     const stopAllSounds = () => {
-        audioRefs.current.forEach((audio) => {
-            if (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-            }
-        });
+        // Logic to stop all sounds
     };
 
     const playSound = (index) => {
@@ -83,6 +70,7 @@ function App() {
 
     const handleGlobalVolumeChange = (value) => {
         setGlobalVolume(value);
+        // Logic to update global volume for all sounds
     };
 
     return (
@@ -94,7 +82,7 @@ function App() {
                     </Heading>
                     <SearchBar setSearchTerm={setSearchTerm} />
                     <Heading as="h4" size="sm">
-                        Volume Global
+                        Global Volume
                     </Heading>
                     <Slider
                         w="40%"
@@ -113,19 +101,27 @@ function App() {
                 <SoundList
                     sounds={displayedSounds}
                     stopAllSounds={stopAllSounds}
-                    audioRefs={audioRefs}
                     globalVolume={globalVolume}
                     playingSound={playingSound}
                     playSound={playSound}
                 />
-                {hasMore && (
-                    <div
-                        ref={ref}
-                        style={{ visibility: "hidden", height: "20px" }}
+                <HStack justifyContent="center" mt={5}>
+                    <Button
+                        onClick={() => handlePageChange(page - 1)}
+                        isDisabled={page === 1}
                     >
-                        Loading more sounds...
-                    </div>
-                )}
+                        Previous
+                    </Button>
+                    <Text>
+                        {page} / {pageCount}
+                    </Text>
+                    <Button
+                        onClick={() => handlePageChange(page + 1)}
+                        isDisabled={page === pageCount}
+                    >
+                        Next
+                    </Button>
+                </HStack>
             </Box>
         </Container>
     );
