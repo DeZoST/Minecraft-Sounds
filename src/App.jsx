@@ -13,7 +13,6 @@ import { debounce } from "lodash";
 import { useInView } from "react-intersection-observer";
 import SoundList from "./components/SoundList";
 import SearchBar from "./components/SearchBar";
-import sounds from "./data/processed_sounds.json";
 
 function App() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -26,38 +25,39 @@ function App() {
     const audioRefs = useRef([]);
     const { ref, inView } = useInView();
 
-    const filterSounds = (term) => {
-        const terms = term.toLowerCase().split(" ");
-        return sounds.filter((sound) =>
-            terms.every(
-                (t) =>
-                    sound.name.toLowerCase().includes(t) ||
-                    sound.tags.some((tag) => tag.includes(t))
-            )
-        );
+    const fetchSounds = async (page, searchTerm) => {
+        try {
+            const response = await fetch(
+                `http://localhost:3000/sounds?page=${page}&search=${searchTerm}`
+            );
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching sounds : ", error);
+            return [];
+        }
     };
 
     const debouncedSearch = useCallback(
-        debounce((term) => {
-            const filteredSounds = filterSounds(term);
-            setDisplayedSounds(filteredSounds.slice(0, itemsPerPage));
-            setHasMore(filteredSounds.length > itemsPerPage);
+        debounce(async (term) => {
+            const sounds = await fetchSounds(1, term);
+            setDisplayedSounds(sounds);
+            setHasMore(sounds.length === itemsPerPage);
             setPage(1);
         }, 300),
-        []
+        [fetchSounds, setDisplayedSounds, setHasMore, setPage]
     );
 
     useEffect(() => {
         debouncedSearch(searchTerm);
     }, [searchTerm, debouncedSearch]);
 
-    const fetchMoreData = () => {
-        const filteredSounds = filterSounds(searchTerm);
+    /*    const fetchMoreData = async () => {
         const nextPage = page + 1;
-        const newSounds = filteredSounds.slice(0, nextPage * itemsPerPage);
+        const sounds = await fetchSounds(nextPage, searchTerm);
 
-        setDisplayedSounds(newSounds);
-        setHasMore(filteredSounds.length > newSounds.length);
+        setDisplayedSounds((prev) => [...prev, ...sounds]);
+        setHasMore(sounds.length === itemsPerPage);
         setPage(nextPage);
     };
 
@@ -65,7 +65,7 @@ function App() {
         if (inView && hasMore) {
             fetchMoreData();
         }
-    }, [inView, hasMore]);
+    }, [inView, hasMore]); */
 
     const stopAllSounds = () => {
         audioRefs.current.forEach((audio) => {
@@ -83,11 +83,6 @@ function App() {
 
     const handleGlobalVolumeChange = (value) => {
         setGlobalVolume(value);
-        audioRefs.current.forEach((audio) => {
-            if (audio) {
-                audio.volume = value / 100;
-            }
-        });
     };
 
     return (
@@ -102,7 +97,7 @@ function App() {
                         Volume Global
                     </Heading>
                     <Slider
-                        w="80%"
+                        w="40%"
                         value={globalVolume}
                         min={0}
                         max={100}

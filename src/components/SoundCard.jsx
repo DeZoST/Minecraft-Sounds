@@ -13,51 +13,67 @@ import {
 import { DownloadIcon, CopyIcon } from "@chakra-ui/icons";
 import PropTypes from "prop-types";
 
-function SoundCard({ sound, audioRef, globalVolume, isPlaying, onPlay }) {
+function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
     const [progress, setProgress] = useState(0);
-    const audioElement = useRef(null);
+    const [audioElement, setAudioElement] = useState(null);
     const intervalRef = useRef(null);
     const toast = useToast();
 
     useEffect(() => {
-        if (audioElement.current) {
-            audioElement.current.volume = globalVolume / 100;
+        if (audioElement) {
+            audioElement.volume = globalVolume / 100;
         }
     }, [globalVolume]);
 
     const playSound = () => {
-        if (audioElement.current) {
+        if (!audioElement) {
+            const newAudioElement = new Audio(
+                `http://localhost:3000/audio/${sound.file}.ogg`
+            );
+            newAudioElement.volume = globalVolume / 100;
+            setAudioElement(newAudioElement);
+
+            newAudioElement.play();
             onPlay();
-            audioElement.current.currentTime = 0;
-            audioElement.current.play();
             intervalRef.current = setInterval(() => {
-                if (audioElement.current) {
-                    const duration = audioElement.current.duration;
-                    const currentTime = audioElement.current.currentTime;
-                    setProgress((currentTime / duration) * 100);
-                }
-            }, 100);
+                const duration = newAudioElement.duration;
+                const currentTime = newAudioElement.currentTime;
+                setProgress((currentTime / duration) * 100);
+            }, 10);
+
+            newAudioElement.addEventListener("ended", handleEnded);
+        } else {
+            audioElement.currentTime = 0;
+            audioElement.play();
+            intervalRef.current = setInterval(() => {
+                const duration = audioElement.duration;
+                const currentTime = audioElement.currentTime;
+                setProgress((currentTime / duration) * 100);
+            }, 10);
         }
     };
 
     const pauseSound = () => {
-        if (audioElement.current) {
-            audioElement.current.pause();
+        if (audioElement) {
+            audioElement.pause();
             clearInterval(intervalRef.current);
+            setProgress(0);
         }
     };
 
     const handleEnded = () => {
         setProgress(0);
         clearInterval(intervalRef.current);
-        if (audioRef) audioRef(null);
+        setAudioElement(null);
     };
 
     const handleDownload = () => {
         const link = document.createElement("a");
-        link.href = audioElement.current.src;
+        link.href = `http://localhost:3000/audio/${sound.file}.ogg`;
         link.download = `${sound.name}.ogg`;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
     };
 
     const handleCopyPath = () => {
@@ -86,20 +102,12 @@ function SoundCard({ sound, audioRef, globalVolume, isPlaying, onPlay }) {
                 {sound.name}
             </Heading>
             <Box my="4">
-                {sound.tags.map((tag, index) => (
+                {sound.tags.split(",").map((tag, index) => (
                     <Tag key={index} mr="2" mb="2" colorScheme="teal">
                         <TagLabel>{tag}</TagLabel>
                     </Tag>
                 ))}
             </Box>
-            <audio
-                ref={(el) => {
-                    audioElement.current = el;
-                    if (audioRef) audioRef(el);
-                }}
-                src={`sounds/${sound.file}.ogg`}
-                onEnded={handleEnded}
-            />
             <Box display="flex" justifyContent="center" gap={2} mt="4">
                 <Button
                     onClick={isPlaying ? pauseSound : () => onPlay()}

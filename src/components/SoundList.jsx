@@ -11,11 +11,7 @@ function SoundList({
     playSound,
 }) {
     return (
-        <SimpleGrid
-            columns={{ base: 1, md: 2, lg: 3 }}
-            spacing="40px"
-            mx="auto"
-        >
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing="40px" mx="auto">
             {sounds.map((sound, index) => (
                 <SoundCard
                     key={index}
