@@ -60,7 +60,7 @@ function App() {
     };
 
     const stopAllSounds = () => {
-        // Logic to stop all sounds
+        // TODO
     };
 
     const playSound = (index) => {
@@ -70,7 +70,7 @@ function App() {
 
     const handleGlobalVolumeChange = (value) => {
         setGlobalVolume(value);
-        // Logic to update global volume for all sounds
+        // TODO
     };
 
     return (
