@@ -34,7 +34,7 @@ function App() {
     const [displayedSounds, setDisplayedSounds] = useState([]);
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(0);
-    const itemsPerPage = 12;
+    const itemsPerPage = 6;
     const [globalVolume, setGlobalVolume] = useState(50);
     const [playingSound, setPlayingSound] = useState(null);
 
