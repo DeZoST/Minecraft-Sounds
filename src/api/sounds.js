@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/sounds", (req, res) => {
-    const { page = 1, limit = 6, search = "" } = req.query;
+    const { page = 1, limit = 12, search = "" } = req.query;
     const offset = (page - 1) * limit;
     const searchQuery = search ? "WHERE name LIKE ? OR tags LIKE ?" : "";
     const params = search ? [`%${search}%`, `%${search}%`] : [];
