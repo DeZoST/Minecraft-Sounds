@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import {
     Box,
     Heading,
@@ -13,7 +13,8 @@ import {
 import { DownloadIcon, CopyIcon } from "@chakra-ui/icons";
 import PropTypes from "prop-types";
 
-function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
+const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
+    const [initialized, setInitialized] = useState(false);
     const [progress, setProgress] = useState(0);
     const [audioElement, setAudioElement] = useState(null);
     const [isPaused, setIsPaused] = useState(false);
@@ -21,10 +22,10 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
     const toast = useToast();
 
     useEffect(() => {
-        if (audioElement) {
+        if (isPlaying && audioElement) {
             audioElement.volume = globalVolume / 100;
         }
-    }, [globalVolume, audioElement]);
+    }, [globalVolume, isPlaying, audioElement]);
 
     useEffect(() => {
         if (isPlaying) {
@@ -34,15 +35,12 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
         }
     }, [isPlaying]);
 
-    useEffect(() => {
-        return () => {
-            if (audioElement) {
-                audioElement.pause();
-                audioElement.removeEventListener("ended", handleEnded);
-                clearInterval(intervalRef.current);
-            }
-        };
-    }, [audioElement]);
+    const initialize = () => {
+        if (!initialized) {
+            setInitialized(true);
+        }
+        onPlay();
+    };
 
     const playSound = () => {
         if (!audioElement) {
@@ -97,6 +95,7 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
         clearInterval(intervalRef.current);
         setAudioElement(null);
         setIsPaused(false);
+        setInitialized(false);
     };
 
     const handleDownload = () => {
@@ -133,10 +132,7 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
                 ))}
             </Box>
             <Box display="flex" justifyContent="center" gap={2} mt="4">
-                <Button
-                    onClick={isPlaying ? pauseSound : onPlay}
-                    colorScheme="teal"
-                >
+                <Button onClick={initialize} colorScheme="teal">
                     {isPlaying && !isPaused ? "Pause" : "Play"}
                 </Button>
                 <Tooltip label="Download">
@@ -149,12 +145,16 @@ function SoundCard({ sound, globalVolume, isPlaying, onPlay }) {
                     <IconButton icon={<CopyIcon />} onClick={handleCopyPath} />
                 </Tooltip>
             </Box>
-            <Box mt="4">
-                <Progress value={progress} size="sm" />
-            </Box>
+            {initialized && (
+                <Box mt="4">
+                    <Progress value={progress} size="sm" />
+                </Box>
+            )}
         </Box>
     );
-}
+});
+
+SoundCard.displayName = "SoundCard";
 
 SoundCard.propTypes = {
     sound: PropTypes.object.isRequired,

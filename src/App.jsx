@@ -34,8 +34,9 @@ function App() {
     const [displayedSounds, setDisplayedSounds] = useState([]);
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(0);
-    const itemsPerPage = 6;
+    const itemsPerPage = 8;
     const [globalVolume, setGlobalVolume] = useState(50);
+    const [sliderVolume, setSliderVolume] = useState(50);
     const [playingSound, setPlayingSound] = useState(null);
 
     const debouncedSearch = useCallback(
@@ -68,9 +69,16 @@ function App() {
         setPlayingSound(index);
     };
 
-    const handleGlobalVolumeChange = (value) => {
-        setGlobalVolume(value);
-        // TODO
+    const debouncedVolumeChange = useCallback(
+        debounce((value) => {
+            setGlobalVolume(value);
+        }, 300),
+        []
+    );
+
+    const handleSliderChange = (value) => {
+        setSliderVolume(value);
+        debouncedVolumeChange(value);
     };
 
     return (
@@ -86,10 +94,10 @@ function App() {
                     </Heading>
                     <Slider
                         w="40%"
-                        value={globalVolume}
+                        value={sliderVolume}
                         min={0}
                         max={100}
-                        onChange={handleGlobalVolumeChange}
+                        onChange={handleSliderChange}
                         mb={10}
                     >
                         <SliderTrack>
