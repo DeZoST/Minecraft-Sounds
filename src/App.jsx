@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback } from "react";
 import {
     Box,
     Container,
@@ -12,7 +11,10 @@ import {
     HStack,
     Text,
 } from "@chakra-ui/react";
+import { useState, useEffect, useCallback } from "react";
 import { debounce } from "lodash";
+import { ThemeProvider } from "./ThemeContext"; // Import ThemeProvider
+import ThemeToggle from "./components/ThemeToggle"; // Import ThemeToggle
 import SoundList from "./components/SoundList";
 import SearchBar from "./components/SearchBar";
 
@@ -51,6 +53,9 @@ function App() {
 
     useEffect(() => {
         debouncedSearch(searchTerm);
+        return () => {
+            debouncedSearch.cancel();
+        };
     }, [searchTerm, debouncedSearch]);
 
     const handlePageChange = async (newPage) => {
@@ -76,62 +81,71 @@ function App() {
         []
     );
 
+    useEffect(() => {
+        return () => {
+            debouncedVolumeChange.cancel();
+        };
+    }, [debouncedVolumeChange]);
+
     const handleSliderChange = (value) => {
         setSliderVolume(value);
         debouncedVolumeChange(value);
     };
 
     return (
-        <Container maxW="container.xl">
-            <Box textAlign="center" my={5}>
-                <VStack position="sticky" top={0} zIndex={999} bgColor="white">
-                    <Heading as="h1" size="xl">
-                        Minecraft Sound Library
-                    </Heading>
-                    <SearchBar setSearchTerm={setSearchTerm} />
-                    <Heading as="h4" size="sm">
-                        Global Volume
-                    </Heading>
-                    <Slider
-                        w="40%"
-                        value={sliderVolume}
-                        min={0}
-                        max={100}
-                        onChange={handleSliderChange}
-                        mb={10}
-                    >
-                        <SliderTrack>
-                            <SliderFilledTrack />
-                        </SliderTrack>
-                        <SliderThumb />
-                    </Slider>
-                </VStack>
-                <SoundList
-                    sounds={displayedSounds}
-                    stopAllSounds={stopAllSounds}
-                    globalVolume={globalVolume}
-                    playingSound={playingSound}
-                    playSound={playSound}
-                />
-                <HStack justifyContent="center" mt={5}>
-                    <Button
-                        onClick={() => handlePageChange(page - 1)}
-                        isDisabled={page === 1}
-                    >
-                        Previous
-                    </Button>
-                    <Text>
-                        {page} / {pageCount}
-                    </Text>
-                    <Button
-                        onClick={() => handlePageChange(page + 1)}
-                        isDisabled={page === pageCount}
-                    >
-                        Next
-                    </Button>
-                </HStack>
-            </Box>
-        </Container>
+        <ThemeProvider>
+            <Container maxW="container.xl">
+                <ThemeToggle />
+                <Box textAlign="center" my={5}>
+                    <VStack position="sticky" top={0} zIndex={999}>
+                        <Heading as="h1" size="xl">
+                            Minecraft Sound Library
+                        </Heading>
+                        <SearchBar setSearchTerm={setSearchTerm} />
+                        <Heading as="h4" size="sm">
+                            Global Volume
+                        </Heading>
+                        <Slider
+                            w="40%"
+                            value={sliderVolume}
+                            min={0}
+                            max={100}
+                            onChange={handleSliderChange}
+                            mb={10}
+                        >
+                            <SliderTrack>
+                                <SliderFilledTrack />
+                            </SliderTrack>
+                            <SliderThumb />
+                        </Slider>
+                    </VStack>
+                    <SoundList
+                        sounds={displayedSounds}
+                        stopAllSounds={stopAllSounds}
+                        globalVolume={globalVolume}
+                        playingSound={playingSound}
+                        playSound={playSound}
+                    />
+                    <HStack justifyContent="center" mt={5}>
+                        <Button
+                            onClick={() => handlePageChange(page - 1)}
+                            isDisabled={page === 1}
+                        >
+                            Previous
+                        </Button>
+                        <Text>
+                            {page} / {pageCount}
+                        </Text>
+                        <Button
+                            onClick={() => handlePageChange(page + 1)}
+                            isDisabled={page === pageCount}
+                        >
+                            Next
+                        </Button>
+                    </HStack>
+                </Box>
+            </Container>
+        </ThemeProvider>
     );
 }
 
