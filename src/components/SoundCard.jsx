@@ -35,6 +35,15 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
         }
     }, [isPlaying]);
 
+    useEffect(() => {
+        return () => {
+            clearInterval(intervalRef.current);
+            if (audioElement) {
+                audioElement.removeEventListener("ended", handleEnded);
+            }
+        };
+    }, [audioElement]);
+
     const initialize = () => {
         if (!initialized) {
             setInitialized(true);
@@ -51,14 +60,16 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
             setAudioElement(newAudioElement);
 
             newAudioElement.play();
-            onPlay(sound.id); // Use unique sound ID
+            onPlay(sound.id);
+            console.log(progress);
 
             intervalRef.current = setInterval(() => {
                 setProgress(
                     (newAudioElement.currentTime / newAudioElement.duration) *
                         100
                 );
-            }, 10);
+                console.log(progress);
+            }, 100);
 
             newAudioElement.addEventListener("ended", handleEnded);
         } else if (isPaused) {
@@ -69,7 +80,8 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
                 setProgress(
                     (audioElement.currentTime / audioElement.duration) * 100
                 );
-            }, 10);
+                console.log(progress);
+            }, 100);
         } else {
             audioElement.currentTime = 0;
             audioElement.play();
@@ -78,7 +90,8 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
                 setProgress(
                     (audioElement.currentTime / audioElement.duration) * 100
                 );
-            }, 10);
+                console.log(progress);
+            }, 100);
         }
     };
 

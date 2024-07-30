@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 import { Input } from "@chakra-ui/react";
+import { memo } from "react";
 
-function SearchBar({ setSearchTerm }) {
+const SearchBar = memo(({ setSearchTerm }) => {
     const handleChange = (event) => {
         setSearchTerm(event.target.value);
     };
@@ -13,10 +14,12 @@ function SearchBar({ setSearchTerm }) {
             my={4}
         />
     );
-}
+});
 
 SearchBar.propTypes = {
     setSearchTerm: PropTypes.func.isRequired,
 };
+
+SearchBar.displayName = "SearchBar";
 
 export default SearchBar;
