@@ -5,7 +5,7 @@ import { useTheme } from "../ThemeContext";
 const ThemeToggle = () => {
     const { isDark, toggleTheme } = useTheme();
     const iconColor = useColorModeValue("black", "white");
-    const bgColor = useColorModeValue("white", "gray.800");
+    const bgColor = useColorModeValue("white", "black");
     const hoverBgColor = useColorModeValue("gray.200", "gray.600");
     const icon = isDark ? (
         <SunIcon color={iconColor} />

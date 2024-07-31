@@ -9,6 +9,10 @@ import {
     IconButton,
     Tooltip,
     useToast,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
 } from "@chakra-ui/react";
 import { DownloadIcon, CopyIcon } from "@chakra-ui/icons";
 import PropTypes from "prop-types";
@@ -61,15 +65,14 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
 
             newAudioElement.play();
             onPlay(sound.id);
-            console.log(progress);
 
             intervalRef.current = setInterval(() => {
                 setProgress(
                     (newAudioElement.currentTime / newAudioElement.duration) *
                         100
                 );
-                console.log(progress);
             }, 100);
+            console.log(progress);
 
             newAudioElement.addEventListener("ended", handleEnded);
         } else if (isPaused) {
@@ -80,8 +83,8 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
                 setProgress(
                     (audioElement.currentTime / audioElement.duration) * 100
                 );
-                console.log(progress);
             }, 100);
+            console.log(progress);
         } else {
             audioElement.currentTime = 0;
             audioElement.play();
@@ -90,8 +93,8 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
                 setProgress(
                     (audioElement.currentTime / audioElement.duration) * 100
                 );
-                console.log(progress);
             }, 100);
+            console.log(progress);
         }
     };
 
@@ -120,16 +123,20 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
         document.body.removeChild(link);
     };
 
-    const handleCopyPath = () => {
-        navigator.clipboard.writeText(sound.file);
+    const handleCopy = (content, description) => {
+        navigator.clipboard.writeText(content);
         toast({
-            title: "Path copied to clipboard",
-            description: sound.file,
+            title: "Copied to clipboard",
+            description: description,
             status: "success",
             duration: 3000,
             isClosable: true,
             position: "top-right",
         });
+    };
+
+    const getMinecraftCommand = (filePath) => {
+        return `/playsound ${filePath.replace(/\//g, ".")}`;
     };
 
     return (
@@ -154,9 +161,33 @@ const SoundCard = memo(({ sound, globalVolume, isPlaying, onPlay }) => {
                         onClick={handleDownload}
                     />
                 </Tooltip>
-                <Tooltip label="Copy Path">
-                    <IconButton icon={<CopyIcon />} onClick={handleCopyPath} />
-                </Tooltip>
+                <Menu>
+                    <Tooltip label="Copy">
+                        <MenuButton as={IconButton} icon={<CopyIcon />} />
+                    </Tooltip>
+                    <MenuList>
+                        <MenuItem
+                            onClick={() => handleCopy(sound.file, sound.file)}
+                        >
+                            Copy file path
+                        </MenuItem>
+                        <MenuItem
+                            onClick={() => handleCopy(sound.name, sound.name)}
+                        >
+                            Copy name
+                        </MenuItem>
+                        <MenuItem
+                            onClick={() =>
+                                handleCopy(
+                                    getMinecraftCommand(sound.file),
+                                    getMinecraftCommand(sound.file)
+                                )
+                            }
+                        >
+                            Copy Minecraft command
+                        </MenuItem>
+                    </MenuList>
+                </Menu>
             </Box>
             {initialized && (
                 <Box mt="4">

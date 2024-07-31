@@ -11,7 +11,7 @@ import {
     HStack,
     Text,
 } from "@chakra-ui/react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Profiler } from "react";
 import { debounce } from "lodash";
 import { ThemeProvider } from "./ThemeContext"; // Import ThemeProvider
 import ThemeToggle from "./components/ThemeToggle"; // Import ThemeToggle
@@ -30,6 +30,26 @@ const fetchSounds = async (page, searchTerm, itemsPerPage) => {
         return { sounds: [], meta: { total: 0, pageCount: 0, currentPage: 1 } };
     }
 };
+
+function onRenderCallback(
+    id,
+    phase,
+    actualDuration,
+    baseDuration,
+    startTime,
+    commitTime,
+    interactions
+) {
+    console.log({
+        id,
+        phase,
+        actualDuration,
+        baseDuration,
+        startTime,
+        commitTime,
+        interactions,
+    });
+}
 
 function App() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -89,7 +109,10 @@ function App() {
 
     const handleSliderChange = (value) => {
         setSliderVolume(value);
-        debouncedVolumeChange(value);
+    };
+
+    const handleSliderChangeEnd = (value) => {
+        setGlobalVolume(value);
     };
 
     return (
@@ -110,7 +133,9 @@ function App() {
                             value={sliderVolume}
                             min={0}
                             max={100}
+                            step={10}
                             onChange={handleSliderChange}
+                            onChangeEnd={handleSliderChangeEnd}
                             mb={10}
                         >
                             <SliderTrack>
@@ -119,13 +144,15 @@ function App() {
                             <SliderThumb />
                         </Slider>
                     </VStack>
-                    <SoundList
-                        sounds={displayedSounds}
-                        stopAllSounds={stopAllSounds}
-                        globalVolume={globalVolume}
-                        playingSound={playingSound}
-                        playSound={playSound}
-                    />
+                    <Profiler id="SoundList" onRender={onRenderCallback}>
+                        <SoundList
+                            sounds={displayedSounds}
+                            stopAllSounds={stopAllSounds}
+                            globalVolume={globalVolume}
+                            playingSound={playingSound}
+                            playSound={playSound}
+                        />
+                    </Profiler>
                     <HStack justifyContent="center" mt={5}>
                         <Button
                             onClick={() => handlePageChange(page - 1)}
