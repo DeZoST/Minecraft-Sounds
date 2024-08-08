@@ -1,31 +1,39 @@
 import PropTypes from "prop-types";
 import { SimpleGrid } from "@chakra-ui/react";
 import SoundCard from "./SoundCard";
-import { memo } from "react";
 
-const SoundList = memo(({ sounds, globalVolume, playingSound, playSound }) => {
+const SoundList = ({
+    sounds,
+    globalVolume,
+    playingSound,
+    playingSoundData,
+    playSound,
+    stopAllSounds,
+}) => {
     return (
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing="40px" mx="auto">
-            {sounds.map((sound, index) => (
+        <SimpleGrid columns={[1, 2]} spacing="40px">
+            {sounds.map((sound) => (
                 <SoundCard
                     key={sound.id}
                     sound={sound}
                     globalVolume={globalVolume}
-                    isPlaying={playingSound === index}
-                    onPlay={() => playSound(index)}
+                    playingSound={playingSound}
+                    playingSoundData={playingSoundData}
+                    playSound={playSound}
+                    stopAllSounds={stopAllSounds}
                 />
             ))}
         </SimpleGrid>
     );
-});
+};
 
 SoundList.propTypes = {
     sounds: PropTypes.array.isRequired,
     globalVolume: PropTypes.number.isRequired,
-    playingSound: PropTypes.number,
-    playSound: PropTypes.func.isRequired,
+    playingSound: PropTypes.object,
+    playingSoundData: PropTypes.object,
+    playSound: PropTypes.func,
+    stopAllSounds: PropTypes.func,
 };
-
-SoundList.displayName = "SoundList";
 
 export default SoundList;

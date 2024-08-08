@@ -20,8 +20,8 @@ const ThemeToggle = () => {
                 aria-label="Toggle theme"
                 icon={icon}
                 onClick={toggleTheme}
-                position="fixed"
-                top="1rem"
+                position="absolute"
+                zIndex={1000}
                 right="1rem"
                 bg={bgColor}
                 _hover={{ bg: hoverBgColor }}

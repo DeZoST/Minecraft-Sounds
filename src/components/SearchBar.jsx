@@ -9,7 +9,7 @@ const SearchBar = memo(({ setSearchTerm }) => {
 
     return (
         <Input
-            placeholder="Rechercher par nom ou tag..."
+            placeholder="Search by name or tag..."
             onChange={handleChange}
             my={4}
         />

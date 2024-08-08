@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import {
     Box,
     Container,
@@ -11,10 +12,9 @@ import {
     HStack,
     Text,
 } from "@chakra-ui/react";
-import { useState, useEffect, useCallback, Profiler } from "react";
 import { debounce } from "lodash";
-import { ThemeProvider } from "./ThemeContext"; // Import ThemeProvider
-import ThemeToggle from "./components/ThemeToggle"; // Import ThemeToggle
+import { ThemeProvider } from "./ThemeContext";
+import ThemeToggle from "./components/ThemeToggle";
 import SoundList from "./components/SoundList";
 import SearchBar from "./components/SearchBar";
 
@@ -31,35 +31,17 @@ const fetchSounds = async (page, searchTerm, itemsPerPage) => {
     }
 };
 
-function onRenderCallback(
-    id,
-    phase,
-    actualDuration,
-    baseDuration,
-    startTime,
-    commitTime,
-    interactions
-) {
-    console.log({
-        id,
-        phase,
-        actualDuration,
-        baseDuration,
-        startTime,
-        commitTime,
-        interactions,
-    });
-}
-
 function App() {
     const [searchTerm, setSearchTerm] = useState("");
     const [displayedSounds, setDisplayedSounds] = useState([]);
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(0);
+    const [allSounds, setAllSounds] = useState([]);
     const itemsPerPage = 8;
     const [globalVolume, setGlobalVolume] = useState(50);
     const [sliderVolume, setSliderVolume] = useState(50);
     const [playingSound, setPlayingSound] = useState(null);
+    const [playingSoundData, setPlayingSoundData] = useState(null);
 
     const debouncedSearch = useCallback(
         debounce(async (term) => {
@@ -70,6 +52,14 @@ function App() {
         }, 300),
         []
     );
+
+    useEffect(() => {
+        const fetchAllSounds = async () => {
+            const data = await fetchSounds(1, "", 1000); // Fetch a large number to cover all data
+            setAllSounds(data.sounds);
+        };
+        fetchAllSounds();
+    }, []);
 
     useEffect(() => {
         debouncedSearch(searchTerm);
@@ -86,19 +76,47 @@ function App() {
     };
 
     const stopAllSounds = () => {
-        // TODO
+        if (playingSound) {
+            playingSound.pause();
+            playingSound.currentTime = 0;
+            setPlayingSound(null);
+            setPlayingSoundData(null);
+        }
     };
 
-    const playSound = (index) => {
+    const playSound = (sound) => {
         stopAllSounds();
-        setPlayingSound(index);
+        const audioElement = new Audio(
+            `http://localhost:3000/audio/${sound.file}.ogg`
+        );
+        audioElement.volume = globalVolume / 100;
+
+        audioElement.addEventListener("ended", () => {
+            setPlayingSound(null);
+            setPlayingSoundData(null);
+        });
+
+        audioElement.play();
+        setPlayingSound(audioElement);
+        setPlayingSoundData(sound);
+    };
+
+    const togglePlaySound = (sound) => {
+        if (playingSoundData?.file === sound.file) {
+            playingSound.paused ? playingSound.play() : playingSound.pause();
+        } else {
+            playSound(sound);
+        }
     };
 
     const debouncedVolumeChange = useCallback(
         debounce((value) => {
             setGlobalVolume(value);
+            if (playingSound) {
+                playingSound.volume = value / 100;
+            }
         }, 300),
-        []
+        [playingSound]
     );
 
     useEffect(() => {
@@ -109,10 +127,7 @@ function App() {
 
     const handleSliderChange = (value) => {
         setSliderVolume(value);
-    };
-
-    const handleSliderChangeEnd = (value) => {
-        setGlobalVolume(value);
+        debouncedVolumeChange(value);
     };
 
     return (
@@ -120,11 +135,14 @@ function App() {
             <Container maxW="container.xl">
                 <ThemeToggle />
                 <Box textAlign="center" my={5}>
-                    <VStack position="sticky" top={0} zIndex={999}>
+                    <VStack>
                         <Heading as="h1" size="xl">
                             Minecraft Sound Library
                         </Heading>
-                        <SearchBar setSearchTerm={setSearchTerm} />
+                        <SearchBar
+                            data={allSounds}
+                            setSearchTerm={setSearchTerm}
+                        />
                         <Heading as="h4" size="sm">
                             Global Volume
                         </Heading>
@@ -133,9 +151,7 @@ function App() {
                             value={sliderVolume}
                             min={0}
                             max={100}
-                            step={10}
                             onChange={handleSliderChange}
-                            onChangeEnd={handleSliderChangeEnd}
                             mb={10}
                         >
                             <SliderTrack>
@@ -144,15 +160,14 @@ function App() {
                             <SliderThumb />
                         </Slider>
                     </VStack>
-                    <Profiler id="SoundList" onRender={onRenderCallback}>
-                        <SoundList
-                            sounds={displayedSounds}
-                            stopAllSounds={stopAllSounds}
-                            globalVolume={globalVolume}
-                            playingSound={playingSound}
-                            playSound={playSound}
-                        />
-                    </Profiler>
+                    <SoundList
+                        sounds={displayedSounds}
+                        globalVolume={globalVolume}
+                        playingSound={playingSound}
+                        playingSoundData={playingSoundData}
+                        playSound={togglePlaySound}
+                        stopAllSounds={stopAllSounds}
+                    />
                     <HStack justifyContent="center" mt={5}>
                         <Button
                             onClick={() => handlePageChange(page - 1)}
