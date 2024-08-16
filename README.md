@@ -4,8 +4,8 @@ Welcome to the **Minecraft Sounds Library**! This web application allows users t
 
 ## 📜 Features
 
-- **Search and Filter**: Search sounds by name or tags.
-- **Autocomplete Suggestions**: Get search suggestions as you type.
+- **Search and Filter**: Search sounds by name or tags. TO IMPROVE
+- **Autocomplete Suggestions**: Get search suggestions as you type. TODO
 - **Playback Controls**: Play and pause sounds directly from the app.
 - **Download Sounds**: Download sounds as `.ogg` files.
 - **Clipboard Actions**: Copy file paths, names, and Minecraft commands to the clipboard.
@@ -20,52 +20,9 @@ Welcome to the **Minecraft Sounds Library**! This web application allows users t
 - **SQLite**: Lightweight, disk-based database.
 - **Vite**: Next-generation frontend tooling for fast development.
 
-## 🚀 Getting Started
+## 🚀 Website
 
-### Prerequisites
-
-Before you begin, ensure you have met the following requirements:
-
-- **Node.js**: Ensure you have Node.js installed. You can download it [here](https://nodejs.org/).
-
-### Installation
-#### *In wait for hosting*
-
-1. **Clone the repository**:
-
-    ```sh
-    git clone https://github.com/DeZoST/Minecraft-Sounds.git
-    cd Minecraft-Sounds
-    ```
-
-2. **Install dependencies**:
-
-    ```sh
-    npm install
-    ```
-
-### Running the Application
-
-1. **Start the frontend application**:
-
-    Open a new terminal window and start the Vite development server:
-
-    ```sh
-    npm run dev
-    ```
-
-2. **Start the backend server**:
-
-    Then navigate to the backend directory and start the server:
-
-    ```sh
-    cd src/api
-    node sounds.js
-    ```
-
-3. **Access the application**:
-
-    Open your web browser and navigate to `http://localhost:5173/Minecraft-Sounds` to view the app.
+### [https://minecraftsound.fr](https://minecraftsound.fr)
 
 ### 🤹 Usage
 
