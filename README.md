@@ -1,6 +1,6 @@
 # 🎵 Minecraft Sounds Library
 
-Welcome to the **Minecraft Sounds Library**! This web application allows users to explore and play various Minecraft sounds. You can search for sounds by name or tag, and even filter by categories! The app supports dark and light themes, and provides features like downloading sounds and copying Minecraft commands.
+Welcome to the **Minecraft Sounds Library**! This web application allows users to explore and play various Minecraft sounds. You can search for sounds by name or tag (for now)! The app supports dark and light themes, and provides features like downloading sounds and copying Minecraft commands.
 
 ## 📜 Features
 
