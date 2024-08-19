@@ -13,6 +13,12 @@ const lightTheme = extendTheme({
             },
         },
     },
+    colors: {
+        skeleton: {
+            start: "gray.100", // Light theme start color
+            end: "gray.200",   // Light theme end color
+        },
+    },
 });
 
 const darkTheme = extendTheme({
@@ -22,6 +28,12 @@ const darkTheme = extendTheme({
                 bg: "gray.800",
                 color: "white",
             },
+        },
+    },
+    colors: {
+        skeleton: {
+            start: "gray.700",
+            end: "gray.600",
         },
     },
 });

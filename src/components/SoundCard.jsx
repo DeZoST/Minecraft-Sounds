@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo } from "react";
 import {
     Box,
     Heading,
@@ -28,30 +28,25 @@ const SoundCard = memo(
         const menuTextColor = useColorModeValue("black", "white");
 
         useEffect(() => {
-            if (isActive && playingSound) {
+	    if (isActive && playingSound) {
                 const updateProgress = () => {
-                    const newProgress =
-                        (playingSound.currentTime / playingSound.duration) *
-                        100;
+                    const newProgress = (playingSound.currentTime / playingSound.duration) * 100;
                     setProgress(newProgress);
                 };
 
-                playingSound.addEventListener("timeupdate", updateProgress);
+                const intervalId = setInterval(updateProgress, 50); // Update every 50ms
 
                 return () => {
-                    playingSound.removeEventListener(
-                        "timeupdate",
-                        updateProgress
-                    );
+                    clearInterval(intervalId);
                 };
             } else {
-                setProgress(0);
+                  setProgress(0);
             }
         }, [isActive, playingSound]);
 
         const handleDownload = () => {
             const link = document.createElement("a");
-            link.href = `http://localhost:3000/audio/${sound.file}.ogg`;
+            link.href = `https://minecraftsound.fr/audio/${sound.file}.ogg`;
             link.download = `${sound.name}.ogg`;
             link.click();
         };
@@ -92,11 +87,12 @@ const SoundCard = memo(
                         <IconButton
                             icon={<DownloadIcon />}
                             onClick={handleDownload}
-                        />
+                            aria-label="Download the sound"
+			/>
                     </Tooltip>
                     <Menu>
                         <Tooltip label="Copy">
-                            <MenuButton as={IconButton} icon={<CopyIcon />} />
+                            <MenuButton aria-label="Copy options menu" as={IconButton} icon={<CopyIcon />} />
                         </Tooltip>
                         <MenuList bg={menuBgColor} color={menuTextColor}>
                             <MenuItem

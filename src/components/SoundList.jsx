@@ -32,8 +32,8 @@ SoundList.propTypes = {
     globalVolume: PropTypes.number.isRequired,
     playingSound: PropTypes.object,
     playingSoundData: PropTypes.object,
-    playSound: PropTypes.func,
-    stopAllSounds: PropTypes.func,
+    playSound: PropTypes.func.isRequired,
+    stopAllSounds: PropTypes.func.isRequired,
 };
 
 export default SoundList;
